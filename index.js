@@ -1,23 +1,33 @@
 const express = require('express');
 const app = express();
+const handlebars = require('express-handlebars');
+const Sequelize = require('sequelize');
+const bodyParser = require('body-parser');
 
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + "/html/index.html");
+//Config
+
+//Template engine
+app.engine('handlebars', handlebars({defaultLayout: 'main'}));
+app.set('view engine', 'handlebars');
+
+// Body Parser
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+// Conexao com o banco de dados MySql
+const sequelize = new Sequelize('sistemadecadastro', 'root', '471577', {
+    host: 'localhost',
+    dialect: 'mysql'
 });
 
-app.get('/about', (req, res) => {
-    res.sendFile(__dirname + "/html/about.html");
+// Rotas
+app.get('/cad', (req, res) => {
+    res.render('formulario');
 });
 
-app.get('/blog', (req, res) => {
-    res.send('Welcome to my blog!')
+app.post('/add', (req, res) => {
+    res.send('Texto: ' + req.body.title + " Conteudo: " + req.body.content);
 });
-
-app.get('/ola/:nome/:cargo', (req, res) => {
-    res.send('<h1>olá, ' + req.params.nome + "</h1>");
-});
-
-
 
 app.listen(8081, () => {
     console.log('Server running on port 8081')
