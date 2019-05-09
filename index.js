@@ -3,6 +3,7 @@ const app = express();
 const handlebars = require('express-handlebars');
 const Sequelize = require('sequelize');
 const bodyParser = require('body-parser');
+const Post = require('./models/Post');
 
 //Config
 
@@ -21,13 +22,38 @@ const sequelize = new Sequelize('sistemadecadastro', 'root', '471577', {
 });
 
 // Rotas
+
+app.get('/', (req, res) => {
+    Post.findAll({order: [['id', 'DESC']]}).then( (posts) => {
+        res.render('home', { posts: posts })
+    })
+});
+
 app.get('/cad', (req, res) => {
-    res.render('formulario');
+    res.render('form');
 });
 
 app.post('/add', (req, res) => {
-    res.send('Texto: ' + req.body.title + " Conteudo: " + req.body.content);
+    Post.create({
+        title: req.body.title,
+        content: req.body.content
+    }).then( () => {
+        res.redirect('/');
+    }).catch( (error) => {
+        res.send('Erro ao criar o post!', error);
+    });
 });
+
+app.get('/delete/:id', (req, res) => {
+    Post.destroy({where: { 'id': req.params.id }})
+        .then( () => {
+            res.send('Postagem deletada com sucesso!')
+        }).catch( (error) => {
+            res.send('Esta postagem não existe!', error)
+        })
+})
+
+
 
 app.listen(8081, () => {
     console.log('Server running on port 8081')
